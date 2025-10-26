@@ -10,8 +10,12 @@
     "lint-format": "npm run lint && npm run format",
     "prepare": "husky",
     "postinstall": "prisma generate",
+    "seed": "tsx prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "lint-staged": {
     "src/**/*.ts": "npm run lint-format"
@@ -40,6 +44,7 @@
     "nodemailer": "^7.0.3",
     "socket.io": "^4.8.1",
     "tsx": "^4.20.3",
+    "vercel": "^48.6.0",
     "winston": "^3.17.0",
     "zod": "^3.25.67"
   },

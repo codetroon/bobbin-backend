@@ -41,23 +41,11 @@ const auth = (...requiredRoles: string[]) => {
         select: {
           id: true,
           role: true,
-          lastPasswordChange: true,
         },
       });
 
       if (!user) {
         throw new ApiError(httpStatus.UNAUTHORIZED, "User no longer exists");
-      }
-
-      // Check if user changed password after token was issued
-      if (
-        user.lastPasswordChange &&
-        verifiedUser.iat < user.lastPasswordChange.getTime() / 1000
-      ) {
-        throw new ApiError(
-          httpStatus.UNAUTHORIZED,
-          "User recently changed password. Please login again",
-        );
       }
 
       // Check if user has required role

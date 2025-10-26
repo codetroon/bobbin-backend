@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
 import globalErrorHandler from "./app/middlewares/globalErrorHandler";
-// import router from "./app/routes/index";
+import router from "./app/routes/index";
 
 const app: Application = express();
 
@@ -15,13 +15,14 @@ app.use(
     origin: process.env.ALLOWED_ORIGINS?.split(",") || [
       "http://localhost:3000",
       "http://localhost:3001",
+      "https://bobbin-frontend.vercel.app",
     ],
     credentials: true,
   }),
 );
 
 // Application routes
-// app.use("/api/v1", router);
+app.use("/api/v1", router);
 
 // Health check endpoint (no CSRF protection)
 app.get("/health", (req: Request, res: Response) => {
@@ -34,7 +35,7 @@ app.get("/health", (req: Request, res: Response) => {
 // Root endpoint
 app.get("/", (req: Request, res: Response) => {
   res.json({
-    message: "Welcome to Bolt Parts API",
+    message: "Welcome to Bobbin API",
     version: "1.0.0",
     documentation: "/api/v1/docs",
   });
