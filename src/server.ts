@@ -30,4 +30,11 @@ async function main() {
   });
 }
 
-main();
+// For Vercel serverless deployment
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  main();
+}
+
+export default app;
