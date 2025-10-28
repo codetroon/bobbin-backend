@@ -2,42 +2,51 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
-const express_rate_limit_1 = require("express-rate-limit");
-const helmet_1 = __importDefault(require("helmet"));
 const globalErrorHandler_1 = __importDefault(require("./app/middlewares/globalErrorHandler"));
 const index_1 = __importDefault(require("./app/routes/index"));
 const app = (0, express_1.default)();
-//parsers
+// Body parsing middleware
 app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
-const limiter = (0, express_rate_limit_1.rateLimit)({
-    windowMs: 15 * 60 * 1000,
-    limit: 100,
-    standardHeaders: "draft-8",
-    legacyHeaders: false,
-    ipv6Subnet: 56,
-});
-// middlewares
-app.use(limiter);
-app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({
-    origin: "*",
+    origin: ((_a = process.env.ALLOWED_ORIGINS) === null || _a === void 0 ? void 0 : _a.split(",")) || [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://bobbin-frontend.vercel.app",
+    ],
+    credentials: true,
 }));
-// application routes
+// Application routes
 app.use("/api/v1", index_1.default);
+// Health check endpoint (no CSRF protection)
 app.get("/health", (req, res) => {
-    res.send("Working fine !");
+    res.json({
+        status: "OK",
+        timestamp: new Date().toISOString(),
+    });
 });
+// Root endpoint
 app.get("/", (req, res) => {
-    res.send("Welcome to Bolt Parts API");
+    res.json({
+        message: "Welcome to Bobbin API",
+        version: "1.0.0",
+        documentation: "/api/v1/docs",
+    });
 });
-// Socket.io connection
-// handleSocketConnection(io);
+// Global error handler
 app.use(globalErrorHandler_1.default);
-//Not Found
-// app.use(notFound);
+// // 404 handler - catch all unmatched routes
+// app.all("*", (req: Request, res: Response) => {
+//   res.status(404).json({
+//     success: false,
+//     message: "API endpoint not found",
+//     path: req.originalUrl,
+//   });
+// });
 exports.default = app;

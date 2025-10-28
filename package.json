@@ -10,12 +10,12 @@
     "lint-format": "npm run lint && npm run format",
     "prepare": "husky",
     "postinstall": "prisma generate",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx src/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx src/seed.ts"
   },
   "lint-staged": {
     "src/**/*.ts": "npm run lint-format"

@@ -12,71 +12,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.categoryController = void 0;
+exports.sizeController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../../utils/catchAsync"));
 const pick_1 = __importDefault(require("../../../utils/pick"));
 const sendResponse_1 = __importDefault(require("../../../utils/sendResponse"));
-const category_service_1 = require("./category.service");
-// add new category
-const addCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield category_service_1.CategoryService.addCategory(req.body);
+const size_service_1 = require("./size.service");
+// add new size
+const addSize = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield size_service_1.SizeService.addSize(req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.CREATED,
-        message: "Category added successfully",
+        message: "Size added successfully",
         data: result,
     });
 }));
-// get all categories with filtering
-const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const filters = (0, pick_1.default)(req.query, ["searchTerm"]);
+// get all sizes with filtering
+const getAllSizes = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = (0, pick_1.default)(req.query, ["searchTerm", "productId"]);
     const options = (0, pick_1.default)(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-    const result = yield category_service_1.CategoryService.getAllCategories(filters, options);
+    const result = yield size_service_1.SizeService.getAllSizes(filters, options);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
-        message: "Categories retrieved successfully",
+        message: "Sizes retrieved successfully",
         data: result.data,
     });
 }));
-// get single category
-const getSingleCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// get single size
+const getSingleSize = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield category_service_1.CategoryService.getSingleCategory(id);
+    const result = yield size_service_1.SizeService.getSingleSize(id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
-        message: "Category retrieved successfully",
+        message: "Size retrieved successfully",
         data: result,
     });
 }));
-// update category
-const updateCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// update size
+const updateSize = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield category_service_1.CategoryService.updateCategory(id, req.body);
+    const result = yield size_service_1.SizeService.updateSize(id, req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
-        message: "Category updated successfully",
+        message: "Size updated successfully",
         data: result,
     });
 }));
-// delete category
-const deleteCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// delete size
+const deleteSize = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield category_service_1.CategoryService.deleteCategory(id);
+    const result = yield size_service_1.SizeService.deleteSize(id);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
-        message: "Category deleted successfully",
+        message: "Size deleted successfully",
         data: result,
     });
 }));
-exports.categoryController = {
-    addCategory,
-    getAllCategories,
-    getSingleCategory,
-    updateCategory,
-    deleteCategory,
+exports.sizeController = {
+    addSize,
+    getAllSizes,
+    getSingleSize,
+    updateSize,
+    deleteSize,
 };

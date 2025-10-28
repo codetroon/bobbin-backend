@@ -12,63 +12,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderService = void 0;
+exports.SizeService = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const prisma_1 = __importDefault(require("../../../shared/prisma"));
-const addOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () {
+const addSize = (sizeData) => __awaiter(void 0, void 0, void 0, function* () {
     // Verify product exists
     const productExists = yield prisma_1.default.product.findUnique({
-        where: { id: orderData.productId },
+        where: { id: sizeData.productId },
     });
     if (!productExists) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Product not found");
     }
-    const newOrder = yield prisma_1.default.order.create({
-        data: orderData,
-        include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
-                },
-            },
+    // Check if size with same name already exists for this product
+    const findExisting = yield prisma_1.default.size.findFirst({
+        where: {
+            name: sizeData.name,
+            productId: sizeData.productId,
         },
     });
-    return newOrder;
+    if (findExisting) {
+        throw new ApiError_1.default(http_status_1.default.CONFLICT, "Size with this name already exists for this product.");
+    }
+    const newSize = yield prisma_1.default.size.create({
+        data: sizeData,
+        include: {
+            product: true,
+        },
+    });
+    return newSize;
 });
-const getAllOrders = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllSizes = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { limit, page, skip } = paginationHelper_1.paginationHelpers.calculatePagination(options);
-    const { searchTerm, status, productId } = filters;
+    const { searchTerm, productId } = filters;
     const andConditions = [];
     if (searchTerm) {
         andConditions.push({
-            OR: [
-                {
-                    customerName: {
-                        contains: searchTerm,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    address: {
-                        contains: searchTerm,
-                        mode: "insensitive",
-                    },
-                },
-                {
-                    contactNumber: {
-                        contains: searchTerm,
-                        mode: "insensitive",
-                    },
-                },
-            ],
-        });
-    }
-    if (status) {
-        andConditions.push({
-            status,
+            name: {
+                contains: searchTerm,
+                mode: "insensitive",
+            },
         });
     }
     if (productId) {
@@ -77,14 +61,9 @@ const getAllOrders = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         });
     }
     const whereConditions = andConditions.length > 0 ? { AND: andConditions } : {};
-    const result = yield prisma_1.default.order.findMany({
+    const result = yield prisma_1.default.size.findMany({
         include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
-                },
-            },
+            product: true,
         },
         where: whereConditions,
         skip,
@@ -95,7 +74,7 @@ const getAllOrders = (filters, options) => __awaiter(void 0, void 0, void 0, fun
                 createdAt: "desc",
             },
     });
-    const total = yield prisma_1.default.order.count({
+    const total = yield prisma_1.default.size.count({
         where: whereConditions,
     });
     return {
@@ -107,33 +86,28 @@ const getAllOrders = (filters, options) => __awaiter(void 0, void 0, void 0, fun
         data: result,
     };
 });
-const getSingleOrder = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.order.findUnique({
+const getSingleSize = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.size.findUnique({
         where: {
             id,
         },
         include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
-                },
-            },
+            product: true,
         },
     });
     if (!result) {
-        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Order not found");
+        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Size not found");
     }
     return result;
 });
-const updateOrder = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.order.findUnique({
+const updateSize = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.size.findUnique({
         where: {
             id,
         },
     });
     if (!result) {
-        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Order not found");
+        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Size not found");
     }
     // If updating productId, verify product exists
     if (payload.productId) {
@@ -144,50 +118,57 @@ const updateOrder = (id, payload) => __awaiter(void 0, void 0, void 0, function*
             throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Product not found");
         }
     }
-    const updatedOrder = yield prisma_1.default.order.update({
+    // If updating name or productId, check for duplicates
+    if (payload.name || payload.productId) {
+        const checkName = payload.name || result.name;
+        const checkProductId = payload.productId || result.productId;
+        const existingSize = yield prisma_1.default.size.findFirst({
+            where: {
+                name: checkName,
+                productId: checkProductId,
+                id: {
+                    not: id,
+                },
+            },
+        });
+        if (existingSize) {
+            throw new ApiError_1.default(http_status_1.default.CONFLICT, "Size with this name already exists for this product.");
+        }
+    }
+    const updatedSize = yield prisma_1.default.size.update({
         where: {
             id,
         },
         data: payload,
         include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
-                },
-            },
+            product: true,
         },
     });
-    return updatedOrder;
+    return updatedSize;
 });
-const deleteOrder = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.order.findUnique({
+const deleteSize = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.size.findUnique({
         where: {
             id,
         },
     });
     if (!result) {
-        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Order not found");
+        throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "Size not found");
     }
-    const deletedOrder = yield prisma_1.default.order.delete({
+    const deletedSize = yield prisma_1.default.size.delete({
         where: {
             id,
         },
         include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
-                },
-            },
+            product: true,
         },
     });
-    return deletedOrder;
+    return deletedSize;
 });
-exports.OrderService = {
-    addOrder,
-    getAllOrders,
-    getSingleOrder,
-    updateOrder,
-    deleteOrder,
+exports.SizeService = {
+    addSize,
+    getAllSizes,
+    getSingleSize,
+    updateSize,
+    deleteSize,
 };

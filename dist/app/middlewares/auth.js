@@ -17,43 +17,49 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../../config"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const prisma_1 = __importDefault(require("../../shared/prisma"));
-const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const auth = (...requiredRoles) => {
-    return (0, catchAsync_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        const token = req.headers.authorization;
-        if (!token) {
-            throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized!");
+    return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            // Get token from header
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, "Access token is required");
+            }
+            const token = authHeader.split(" ")[1];
+            // Verify token
+            let verifiedUser;
+            try {
+                verifiedUser = jsonwebtoken_1.default.verify(token, config_1.default.jwt.secret);
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            }
+            catch (error) {
+                throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, "Invalid access token");
+            }
+            // Check if user still exists
+            const user = yield prisma_1.default.user.findUnique({
+                where: { id: verifiedUser.userId },
+                select: {
+                    id: true,
+                    role: true,
+                },
+            });
+            if (!user) {
+                throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, "User no longer exists");
+            }
+            // Check if user has required role
+            if (requiredRoles.length && !requiredRoles.includes(user.role)) {
+                throw new ApiError_1.default(http_status_1.default.FORBIDDEN, "Insufficient permissions");
+            }
+            // Add user to request object
+            req.user = {
+                userId: user.id,
+                role: user.role,
+            };
+            next();
         }
-        const decoded = jsonwebtoken_1.default.verify(token, config_1.default.jwt.secret);
-        const { userId } = decoded;
-        // Fetch user from database using Prisma
-        const user = yield prisma_1.default.user.findUnique({
-            where: { id: userId },
-        });
-        if (!user) {
-            throw new ApiError_1.default(http_status_1.default.NOT_FOUND, "User not found!");
+        catch (error) {
+            next(error);
         }
-        if (user.isDeleted) {
-            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, "User is deleted!");
-        }
-        if (user.status === "blocked") {
-            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, "User is blocked!");
-        }
-        // // Check if password changed after token issued
-        // if (
-        //   user.passwordChangedAt &&
-        //   iat &&
-        //   new Date(user.passwordChangedAt).getTime() / 1000 > iat
-        // ) {
-        //   throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
-        // }
-        // Check if user has required role
-        if (requiredRoles.length && !requiredRoles.includes(user.role)) {
-            throw new ApiError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized!");
-        }
-        // Attach decoded user info to the request
-        req.user = decoded;
-        next();
-    }));
+    });
 };
 exports.default = auth;

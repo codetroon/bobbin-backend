@@ -12,35 +12,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderController = void 0;
+exports.orderController = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../../utils/catchAsync"));
+const pick_1 = __importDefault(require("../../../utils/pick"));
 const sendResponse_1 = __importDefault(require("../../../utils/sendResponse"));
 const order_service_1 = require("./order.service");
-//  create order
-const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.user;
-    const result = yield order_service_1.OrderService.createOrder(userId, req.body);
+// add new order
+const addOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield order_service_1.OrderService.addOrder(req.body);
     (0, sendResponse_1.default)(res, {
         success: true,
-        statusCode: http_status_1.default.OK,
+        statusCode: http_status_1.default.CREATED,
         message: "Order created successfully",
         data: result,
     });
 }));
-// cancel order
-const cancelOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { orderId } = req.params;
-    const { userId } = req.user;
-    yield order_service_1.OrderService.cancelOrder(userId, orderId);
+// get all orders with filtering
+const getAllOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = (0, pick_1.default)(req.query, ["searchTerm", "status", "productId"]);
+    const options = (0, pick_1.default)(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const result = yield order_service_1.OrderService.getAllOrders(filters, options);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_1.default.OK,
-        message: "Order cancelled successfully",
-        data: null,
+        message: "Orders retrieved successfully",
+        data: result.data,
     });
 }));
-exports.OrderController = {
-    createOrder,
-    cancelOrder,
+// get single order
+const getSingleOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield order_service_1.OrderService.getSingleOrder(id);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "Order retrieved successfully",
+        data: result,
+    });
+}));
+// update order
+const updateOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield order_service_1.OrderService.updateOrder(id, req.body);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "Order updated successfully",
+        data: result,
+    });
+}));
+// delete order
+const deleteOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield order_service_1.OrderService.deleteOrder(id);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_1.default.OK,
+        message: "Order deleted successfully",
+        data: result,
+    });
+}));
+exports.orderController = {
+    addOrder,
+    getAllOrders,
+    getSingleOrder,
+    updateOrder,
+    deleteOrder,
 };

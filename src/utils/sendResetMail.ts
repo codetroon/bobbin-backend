@@ -1,10 +1,10 @@
+import { User } from "@prisma/client";
 import httpStatus from "http-status";
 import nodemailer from "nodemailer";
-import { TUser } from "../app/modules/auth/auth.interfaces";
 import config from "../config";
 import ApiError from "../errors/ApiError";
 
-export const sendResetMail = async (resetLink: string, userInfo: TUser) => {
+export const sendResetMail = async (resetLink: string, userInfo: User) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

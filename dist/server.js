@@ -13,21 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = require("http");
-const socket_io_1 = require("socket.io");
 const app_1 = __importDefault(require("./app"));
-const chat_gateway_1 = require("./app/modules/chat/chat.gateway");
 const config_1 = __importDefault(require("./config"));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const httpServer = new http_1.Server(app_1.default);
-        const io = new socket_io_1.Server(httpServer, {
-            cors: {
-                origin: "*",
-            },
-            connectionStateRecovery: {},
-        });
-        // Handle Socket.IO connections for user-seller chat
-        (0, chat_gateway_1.handleSocketConnection)(io);
         httpServer.listen(config_1.default.port, () => {
             console.info(`Server running on port ${config_1.default.port}`);
         });

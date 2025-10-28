@@ -6,7 +6,14 @@ import { OrderValidation } from "./order.validation";
 
 const router = express.Router();
 
-// All order routes require super_admin or admin authentication
+// Public route - anyone can create an order
+router.post(
+  "/",
+  validateRequest(OrderValidation.createOrderZodSchema),
+  orderController.addOrder,
+);
+
+// Protected admin routes
 // Get all orders with filtering
 router.get("/", auth("super_admin", "admin"), orderController.getAllOrders);
 
@@ -15,14 +22,6 @@ router.get(
   "/:id",
   auth("super_admin", "admin"),
   orderController.getSingleOrder,
-);
-
-// Create new order
-router.post(
-  "/",
-  auth("super_admin", "admin"),
-  validateRequest(OrderValidation.createOrderZodSchema),
-  orderController.addOrder,
 );
 
 // Update order
