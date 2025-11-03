@@ -18,6 +18,8 @@ app.use(
       "https://bobbin-frontend.vercel.app",
       "https://www.bobbinapparels.com",
       "https://bobbinapparels.com",
+      "https://bobbin.com.bd",
+      "https://www.bobbin.com.bd",
     ],
     credentials: true,
   }),

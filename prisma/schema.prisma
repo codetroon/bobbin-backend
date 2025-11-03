@@ -72,6 +72,20 @@ model Order {
   updatedAt     DateTime @updatedAt
 }
 
+model HeroSettings {
+  id               String   @id @default(uuid())
+  title            String   @default("Elevate Your Style")
+  subtitle         String   @default("Discover premium essentials crafted for the modern gentleman. Quality that speaks, comfort that lasts.")
+  primaryBtnText   String   @default("Shop Now")
+  primaryBtnLink   String   @default("/products")
+  secondaryBtnText String   @default("Learn More")
+  secondaryBtnLink String   @default("/about")
+  backgroundImage  String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
 enum Role {
   super_admin
   admin

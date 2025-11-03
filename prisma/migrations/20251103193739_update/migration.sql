@@ -69,6 +69,23 @@ CREATE TABLE "Order" (
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "HeroSettings" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL DEFAULT 'Elevate Your Style',
+    "subtitle" TEXT NOT NULL DEFAULT 'Discover premium essentials crafted for the modern gentleman. Quality that speaks, comfort that lasts.',
+    "primaryBtnText" TEXT NOT NULL DEFAULT 'Shop Now',
+    "primaryBtnLink" TEXT NOT NULL DEFAULT '/products',
+    "secondaryBtnText" TEXT NOT NULL DEFAULT 'Learn More',
+    "secondaryBtnLink" TEXT NOT NULL DEFAULT '/about',
+    "backgroundImage" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "HeroSettings_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
