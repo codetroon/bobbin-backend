@@ -19,7 +19,8 @@ app.use((0, cors_1.default)({
         "http://localhost:3000",
         "http://localhost:3001",
         "https://bobbin-frontend.vercel.app",
-        "https://bobbin-frontend-xi.vercel.app",
+        "https://www.bobbinapparels.com",
+        "https://bobbinapparels.com",
     ],
     credentials: true,
 }));
