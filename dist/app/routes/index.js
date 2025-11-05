@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_route_1 = require("../modules/auth/auth.route");
 const category_route_1 = require("../modules/category/category.route");
+const hero_route_1 = require("../modules/hero/hero.route");
 const order_route_1 = require("../modules/order/order.route");
 const product_route_1 = require("../modules/product/product.route");
 const size_route_1 = require("../modules/size/size.route");
@@ -27,6 +28,10 @@ const moduleRoutes = [
     {
         path: "/orders",
         route: order_route_1.OrderRoutes,
+    },
+    {
+        path: "/hero",
+        route: hero_route_1.HeroRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

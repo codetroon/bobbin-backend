@@ -48,11 +48,25 @@ function main() {
                     { name: "Punjabi" },
                     { name: "Joggers" },
                     { name: "Hoodies" },
-                    { name: "Casual Wear" },
-                    { name: "Formal Wear" },
                 ],
             });
             console.log("Sample categories created");
+        }
+        // Create default hero settings if none exist
+        const heroSettingsCount = yield prisma.heroSettings.count();
+        if (heroSettingsCount === 0) {
+            yield prisma.heroSettings.create({
+                data: {
+                    title: "Elevate Your Style",
+                    subtitle: "Discover premium essentials crafted for the modern gentleman. Quality that speaks, comfort that lasts.",
+                    primaryBtnText: "Shop Now",
+                    primaryBtnLink: "/products",
+                    secondaryBtnText: "Learn More",
+                    secondaryBtnLink: "/about",
+                    isActive: true,
+                },
+            });
+            console.log("Default hero settings created");
         }
     });
 }
