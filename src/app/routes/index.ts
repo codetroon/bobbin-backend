@@ -5,6 +5,7 @@ import { HeroRoutes } from "../modules/hero/hero.route";
 import { OrderRoutes } from "../modules/order/order.route";
 import { ProductRoutes } from "../modules/product/product.route";
 import { SizeRoutes } from "../modules/size/size.route";
+import { SizeGuideRoutes } from "../modules/sizeGuide/sizeGuide.routes";
 
 const router = Router();
 
@@ -24,6 +25,10 @@ const moduleRoutes = [
   {
     path: "/sizes",
     route: SizeRoutes,
+  },
+  {
+    path: "/size-guides",
+    route: SizeGuideRoutes,
   },
   {
     path: "/orders",
