@@ -21,22 +21,50 @@ const addOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* () {
     // Verify product exists
     const productExists = yield prisma_1.default.product.findUnique({
         where: { id: orderData.productId },
+        include: {
+            Size: true,
+        },
     });
     if (!productExists) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, "Product not found");
     }
-    const newOrder = yield prisma_1.default.order.create({
-        data: orderData,
-        include: {
-            products: {
-                include: {
-                    category: true,
-                    Size: true,
+    // Find the size that was ordered
+    const sizeRecord = productExists.Size.find((s) => s.name === orderData.size);
+    if (!sizeRecord) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, `Size "${orderData.size}" not available for this product`);
+    }
+    // Check if sufficient stock is available
+    if (sizeRecord.stock < orderData.quantity) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, `Insufficient stock for size "${orderData.size}". Available: ${sizeRecord.stock}, Requested: ${orderData.quantity}`);
+    }
+    // Create order and update stock in a transaction
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        // Create the order
+        const newOrder = yield tx.order.create({
+            data: orderData,
+            include: {
+                products: {
+                    include: {
+                        category: true,
+                        Size: true,
+                    },
                 },
             },
-        },
-    });
-    return newOrder;
+        });
+        // Decrement the stock for the ordered size
+        yield tx.size.update({
+            where: {
+                id: sizeRecord.id,
+            },
+            data: {
+                stock: {
+                    decrement: orderData.quantity,
+                },
+            },
+        });
+        return newOrder;
+    }));
+    return result;
 });
 const getAllOrders = (filters, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { limit, page, skip } = paginationHelper_1.paginationHelpers.calculatePagination(options);

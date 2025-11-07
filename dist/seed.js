@@ -19,22 +19,20 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         // Check if admin user already exists
         const existingAdmin = yield prisma.user.findUnique({
-            where: { email: "admin@bobbin.com" },
+            where: { email: process.env.ADMIN_EMAIL },
         });
         if (!existingAdmin) {
             // Create default admin user
-            const hashedPassword = yield bcrypt_1.default.hash("admin123", 12);
+            const hashedPassword = yield bcrypt_1.default.hash(process.env.ADMIN_PASS, 12);
             yield prisma.user.create({
                 data: {
                     name: "Admin User",
-                    email: "admin@bobbin.com",
+                    email: process.env.ADMIN_EMAIL,
                     password: hashedPassword,
                     role: "super_admin",
                 },
             });
             console.log("Default admin user created:");
-            console.log("Email: admin@bobbin.com");
-            console.log("Password: admin123");
         }
         else {
             console.log("Admin user already exists");

@@ -16,6 +16,15 @@ const createOrderZodSchema = zod_1.z.object({
         productId: zod_1.z.string({
             required_error: "Product ID is required",
         }),
+        size: zod_1.z.string({
+            required_error: "Size is required",
+        }),
+        quantity: zod_1.z
+            .number({
+            required_error: "Quantity is required",
+        })
+            .int()
+            .positive("Quantity must be positive"),
         totalPrice: zod_1.z
             .number({
             required_error: "Total price is required",
@@ -32,6 +41,8 @@ const updateOrderZodSchema = zod_1.z.object({
         address: zod_1.z.string().optional(),
         contactNumber: zod_1.z.string().optional(),
         productId: zod_1.z.string().optional(),
+        size: zod_1.z.string().optional(),
+        quantity: zod_1.z.number().int().positive("Quantity must be positive").optional(),
         totalPrice: zod_1.z.number().positive("Total price must be positive").optional(),
         status: zod_1.z.string().optional(),
     }),
