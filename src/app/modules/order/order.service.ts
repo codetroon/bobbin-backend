@@ -18,24 +18,64 @@ const addOrder = async (orderData: ICreateOrderData): Promise<Order> => {
   // Verify product exists
   const productExists = await prisma.product.findUnique({
     where: { id: orderData.productId },
+    include: {
+      Size: true,
+    },
   });
 
   if (!productExists) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Product not found");
   }
 
-  const newOrder = await prisma.order.create({
-    data: orderData,
-    include: {
-      products: {
-        include: {
-          category: true,
-          Size: true,
+  // Find the size that was ordered
+  const sizeRecord = productExists.Size.find((s) => s.name === orderData.size);
+
+  if (!sizeRecord) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `Size "${orderData.size}" not available for this product`,
+    );
+  }
+
+  // Check if sufficient stock is available
+  if (sizeRecord.stock < orderData.quantity) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `Insufficient stock for size "${orderData.size}". Available: ${sizeRecord.stock}, Requested: ${orderData.quantity}`,
+    );
+  }
+
+  // Create order and update stock in a transaction
+  const result = await prisma.$transaction(async (tx) => {
+    // Create the order
+    const newOrder = await tx.order.create({
+      data: orderData,
+      include: {
+        products: {
+          include: {
+            category: true,
+            Size: true,
+          },
         },
       },
-    },
+    });
+
+    // Decrement the stock for the ordered size
+    await tx.size.update({
+      where: {
+        id: sizeRecord.id,
+      },
+      data: {
+        stock: {
+          decrement: orderData.quantity,
+        },
+      },
+    });
+
+    return newOrder;
   });
-  return newOrder;
+
+  return result;
 };
 
 const getAllOrders = async (

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthRoutes } from "../modules/auth/auth.route";
 import { CategoryRoutes } from "../modules/category/category.route";
+import { ContactMessageRoutes } from "../modules/contactMessage/contactMessage.routes";
 import { HeroRoutes } from "../modules/hero/hero.route";
 import { OrderRoutes } from "../modules/order/order.route";
 import { ProductRoutes } from "../modules/product/product.route";
@@ -37,6 +38,10 @@ const moduleRoutes = [
   {
     path: "/hero",
     route: HeroRoutes,
+  },
+  {
+    path: "/contact-messages",
+    route: ContactMessageRoutes,
   },
 ];
 

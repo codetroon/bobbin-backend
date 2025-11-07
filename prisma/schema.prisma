@@ -67,6 +67,8 @@ model Order {
   contactNumber String
   productId     String
   products      Product  @relation(fields: [productId], references: [id])
+  size          String   @default("M")
+  quantity      Int      @default(1)
   totalPrice    Float
   status        String
   createdAt     DateTime @default(now())
@@ -98,6 +100,16 @@ model SizeGuide {
   updatedAt  DateTime @updatedAt
 
   @@unique([categoryId])
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
