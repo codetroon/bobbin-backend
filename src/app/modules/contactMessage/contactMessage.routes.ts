@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Public route - anyone can submit a contact message
 router.post(
-  "/",
+  "/add",
   validateRequest(ContactMessageValidation.createContactMessageZodSchema),
   ContactMessageController.createContactMessage,
 );
